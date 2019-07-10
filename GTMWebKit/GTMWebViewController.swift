@@ -177,7 +177,7 @@ open class GTMWebViewController: UIViewController, GTMAlertable {
     }
     
     // MARK: - Private
-    func loadWebPage() {
+    open func loadWebPage() {
         guard let url = self.webUrl else {
             println("没有为GTMWebViewController提供有效的网页URL")
             return
@@ -214,6 +214,26 @@ open class GTMWebViewController: UIViewController, GTMAlertable {
                 self?.loadWebPage()
             }
             self.view.addSubview(netErrorView)
+        }
+    }
+    
+    // 返回
+    open func onWebpageBack() {
+        webView.goBack()
+        self.updateButtonItems()
+    }
+    
+    open func updateButtonItems() {
+        switch navigType {
+        case .navbar:
+            self.updateNavbarButtonItems()
+        case .toolbar:
+            self.updateToolbarButtonItems()
+        case .both:
+            self.updateNavbarButtonItems()
+            self.updateToolbarButtonItems()
+        default:
+            break
         }
     }
     
@@ -266,7 +286,6 @@ extension GTMWebViewController {
     }
     
     // MARK: - Navigation Events
-    
     @objc func onNavigationDone() {
         self.dismiss(animated: true, completion: nil)
     }
@@ -297,11 +316,6 @@ extension GTMWebViewController {
             let activityVC = UIActivityViewController.init(activityItems: [url], applicationActivities: nil)
             self.present(activityVC, animated: true, completion: nil)
         }
-    }
-    
-    func onWebpageBack() {
-        webView.goBack()
-        self.updateButtonItems()
     }
     
     // MARK: Navigation Items
@@ -383,19 +397,6 @@ extension GTMWebViewController {
         self.toolbarItemAction = UIBarButtonItem.init(barButtonSystemItem: .action, target: self, action: #selector(onToolbarAction))
     }
     
-    func updateButtonItems() {
-        switch navigType {
-        case .navbar:
-            self.updateNavbarButtonItems()
-        case .toolbar:
-            self.updateToolbarButtonItems()
-        case .both:
-            self.updateNavbarButtonItems()
-            self.updateToolbarButtonItems()
-        default:
-            break
-        }
-    }
     private func updateNavbarButtonItems() {
         self.navigationItem.setLeftBarButtonItems(nil, animated: false)
         if webView.canGoBack {

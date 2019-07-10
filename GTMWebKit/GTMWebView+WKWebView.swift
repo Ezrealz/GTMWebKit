@@ -27,7 +27,7 @@ extension GTMWebViewController: WKNavigationDelegate {
         configuration.preferences.javaScriptEnabled = true
         configuration.allowsInlineMediaPlayback = true  // 允许视频播放回退
         configuration.userContentController = WKUserContentController()     // 交互对象
-        configuration.userContentController.add(self.weakScriptHandler, name: "GTMWebKitAPI")
+        configuration.userContentController.add(self.weakScriptHandler, name: "ffw_jsapi")
         let wkWebV = WKWebView(frame: self.view.bounds, configuration: configuration)     // WKWebView
         wkWebV.uiDelegate = self
         wkWebV.navigationDelegate = self
@@ -185,8 +185,14 @@ extension GTMWebViewController: WKNavigationDelegate {
 extension GTMWebViewController: WKScriptMessageHandler {
     
     public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        if message.name == "GTMWebKitAPI" {
-            if let body = message.body as? Dictionary<String, Any> {
+        if message.name == "ffw_jsapi" {
+            if let body = message.body as? String {
+                if let data = body.data(using: .utf8), let jsonData = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers), let parma = jsonData as? [String: Any] {
+                    if let method = parma["type"] as? String, let handler = self.scriptHandlers[method] {
+                        handler(body)
+                    }
+                }
+            } else if let body = message.body as? Dictionary<String, Any> {
                 let method = body["method"] as! String
                 println("\(body)")
                 println("\(method)")
